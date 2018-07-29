@@ -9,8 +9,8 @@ def stat_data():
     conn = MySQLConnect('localhost', 'root', 'yexinjing', 'dige')
     sql = '''
     
-    
     '''
+    conn.execute(sql)
 
 if __name__ == '__main__':
     stat_data()
