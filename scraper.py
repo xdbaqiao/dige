@@ -28,7 +28,7 @@ def init_csi():
     for i in open('csi.csv'):
         for k in json.loads(i.strip()):
             tradedate = k['tradedate'].split(' ')[0].replace('-', '')
-            string = '\t'.join([k['indx_code'], k['tclose'], tradedate])
+            string = '\t'.join([k['indx_code'], k['tclose'], tradedate, k['changes']])
             f.write(string + '\n')
     f.close()
     load_to_database('quote_csi', './datacsi.csv', db='dige', delete=False)
@@ -58,9 +58,10 @@ def incr_database(conn):
                 trddate = trddate.replace('-', '')
             m = xpath.search(html, r'//table[@class="table\stc"]/tr/td', remove=None)
             close = m[0] if m else None
+            change = m[1] if m and len(m)>1 else None
             sql = ''' 
-                     REPLACE INTO quote_csi(code, close, date) VALUES('%s',%s,%s);
-            ''' % (code, close, trddate)
+                     REPLACE INTO quote_csi(code, close, date, chg) VALUES('%s',%s,%s,%s);
+            ''' % (code, close, trddate, change)
             conn.execute(sql)
         else:
             today = datetime.today().strftime('%Y-%m-%d')
@@ -83,7 +84,8 @@ def scraper_from_tushare(conn):
 if __name__ == '__main__':
     conn = MySQLConnect('localhost', 'root', 'yexinjing', 'dige')
     try:
-        scraper_from_tushare(conn)
+        #scraper_from_tushare(conn)
         #init_csi()
+        load_code2name(conn)
     finally:
         conn.close()
